@@ -7,6 +7,13 @@
 
 const jwt = require('jsonwebtoken');
 
+const isProduction = process.env.NODE_ENV === 'production';
+const CLEAR_COOKIE_OPTIONS = {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+};
+
 /**
  * Verifies the JWT stored in the HTTP-only cookie 'token'.
  * HTTP-only cookies cannot be read by JavaScript, preventing XSS token theft.
@@ -25,7 +32,7 @@ function authMiddleware(req, res, next) {
         next();
     } catch {
         // Token is expired or tampered - clear the invalid cookie
-        res.clearCookie('token');
+        res.clearCookie('token', CLEAR_COOKIE_OPTIONS);
         return res.status(401).json({ error: 'Session expired. Please log in again.' });
     }
 }

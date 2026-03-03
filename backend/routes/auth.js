@@ -16,11 +16,14 @@ const User = require('../models/User');
 const gameEvents = require('../events/gameEvents');
 
 /** Shared cookie config - centralised so options are consistent across routes */
+const isProduction = process.env.NODE_ENV === 'production';
 const COOKIE_OPTIONS = {
-    httpOnly: true,                                      // No JS access (XSS protection)
-    secure: process.env.NODE_ENV === 'production',       // HTTPS only in production
-    sameSite: 'lax',                                     // CSRF mitigation
-    maxAge: 24 * 60 * 60 * 1000,                        // 24-hour session
+    httpOnly: true,                      // No JS access (XSS protection)
+    secure: isProduction,                // HTTPS only in production
+    // 'none' is required for cross-site cookies (Vercel → Render). Must pair with secure:true.
+    // Falls back to 'lax' in local dev where both origins are localhost.
+    sameSite: isProduction ? 'none' : 'lax',
+    maxAge: 24 * 60 * 60 * 1000,        // 24-hour session
 };
 
 // POST /api/auth/register
@@ -98,7 +101,7 @@ router.post('/login', async (req, res) => {
 
 // POST /api/auth/logout - Destroys the session by clearing the cookie
 router.post('/logout', (req, res) => {
-    res.clearCookie('token');
+    res.clearCookie('token', COOKIE_OPTIONS);
     res.json({ message: 'Logged out successfully' });
 });
 
@@ -111,7 +114,7 @@ router.get('/me', (req, res) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         res.json({ user: { userId: decoded.userId, username: decoded.username } });
     } catch {
-        res.clearCookie('token');
+        res.clearCookie('token', COOKIE_OPTIONS);
         res.json({ user: null });
     }
 });

@@ -23,7 +23,7 @@ const PHASE = {
   GAMEOVER: "gameover",
 };
 
-const HIT_PX = 46;       // pixel-radius for a "hit" (before pct conversion)
+const HIT_PX = 46; // pixel-radius for a "hit" (before pct conversion)
 const TOTAL_ROUNDS = 8;
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -51,12 +51,12 @@ function makeHearts(count) {
 
 /** Per-round configuration — gets harder each round */
 function roundCfg(r) {
-  const total = Math.min(8 + (r - 1) * 3, 28);   // more hearts each round
+  const total = Math.min(8 + (r - 1) * 3, 28); // more hearts each round
   return {
     total,
     target: Math.max(1, Math.floor(total * 0.2)), // 20% of hearts to mark
-    secs: Math.max(1.5, 3.5 - (r - 1) * 0.25),   // shorter flash time
-    pts: 50 + (r - 1) * 10,                        // more pts per hit later
+    secs: Math.max(1.5, 3.5 - (r - 1) * 0.25), // shorter flash time
+    pts: 50 + (r - 1) * 10, // more pts per hit later
   };
 }
 
@@ -143,7 +143,7 @@ export default function MemoryGame({ onComplete }) {
         const dx = (h.xPct - c.xPct) / hitX;
         const dy = (h.yPct - c.yPct) / hitY;
         return Math.hypot(dx, dy) <= 1; // within elliptic hit zone
-      })
+      }),
     );
 
     const hits = results.filter(Boolean).length;
@@ -262,12 +262,10 @@ export default function MemoryGame({ onComplete }) {
       {/* ── IDLE ── */}
       {phase === PHASE.IDLE && (
         <div className="game-start">
+          <p>Hearts flash on the board — memorise where they are!</p>
           <p>
-            Hearts flash on the board — memorise where they are!
-          </p>
-          <p>
-            Then they vanish. Click on{" "}
-            <strong>20% of the positions</strong> where hearts were hiding. 🫀
+            Then they vanish. Click on <strong>20% of the positions</strong>{" "}
+            where hearts were hiding. 🫀
           </p>
           <p className="score-hint">
             50–120 pts per correct click · {TOTAL_ROUNDS} rounds · Flash time
@@ -291,8 +289,7 @@ export default function MemoryGame({ onComplete }) {
             {isShowing && (
               <>
                 👁&nbsp;Memorise!&nbsp;
-                <strong>{timeLeft}s</strong> remaining
-                &nbsp;·&nbsp;
+                <strong>{timeLeft}s</strong> remaining &nbsp;·&nbsp;
                 <span style={{ color: "#a0a0c0" }}>
                   {cfg.total} hearts shown · you will mark {cfg.target}
                 </span>
@@ -310,9 +307,7 @@ export default function MemoryGame({ onComplete }) {
             )}
             {isReveal && (
               <span
-                className={
-                  roundResult.hits > 0 ? "reveal-good" : "reveal-bad"
-                }
+                className={roundResult.hits > 0 ? "reveal-good" : "reveal-bad"}
               >
                 {roundResult.hits}/{cfg.target} correct! +{roundResult.pts} pts
               </span>

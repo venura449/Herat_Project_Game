@@ -23,8 +23,22 @@ const PORT = process.env.PORT || 5000;
 
 // ── Middleware Pipeline ────────────────────────────────────────────────────
 // Each middleware handles a distinct cross-cutting concern
+const allowedOrigins = process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL.split(',').map(o => o.trim())
+    : ['http://localhost:5173'];
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+        // Allow requests with no origin (e.g. curl, mobile apps)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.some(allowed =>
+            allowed === origin ||
+            (allowed.startsWith('https://') && origin.endsWith('.vercel.app') && origin.includes('herat-project-game'))
+        )) {
+            return callback(null, true);
+        }
+        callback(new Error(`CORS: origin ${origin} not allowed`));
+    },
     credentials: true, // Required to accept cookies from the React frontend
 }));
 app.use(express.json());

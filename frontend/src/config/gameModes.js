@@ -40,6 +40,19 @@ export const GAME_MODES = {
         lives: 3,
         defaultMaxQ: 0,
     },
+    memory: {
+        id: 'memory',
+        label: 'Memory Blindfold',
+        emoji: '🫀',
+        accent: '#ff4d8d',          // Hot pink
+        glow: 'rgba(255,77,141,0.18)',
+        description: 'Hearts flash on the board — memorise their spots, then click 20% of the positions blindfolded!',
+        scoring: '50–120 pts per correct click · 8 rounds · Gets harder each round',
+        timeLimit: 0,
+        lives: 0,
+        defaultMaxQ: 8,
+        isMemoryGame: true,         // Rendered by MemoryGame, not GameBoard
+    },
 };
 
 /** Returns points earned for a given mode + outcome */

@@ -11,6 +11,7 @@ import Login from "./components/Auth/Login";
 import Register from "./components/Auth/Register";
 import GameLobby from "./components/Game/GameLobby";
 import GameBoard from "./components/Game/GameBoard";
+import MemoryGame from "./components/Game/MemoryGame";
 import Leaderboard from "./components/Game/Leaderboard";
 import CompetitionHub from "./components/Competitions/CompetitionHub";
 import CompetitionRoom from "./components/Competitions/CompetitionRoom";
@@ -54,6 +55,15 @@ function AppRoutes() {
             element={
               <ProtectedRoute>
                 <GameLobby />
+              </ProtectedRoute>
+            }
+          />
+          {/* Memory Blindfold — static segment matches before :mode wildcard */}
+          <Route
+            path="/game/memory"
+            element={
+              <ProtectedRoute>
+                <MemoryGame />
               </ProtectedRoute>
             }
           />

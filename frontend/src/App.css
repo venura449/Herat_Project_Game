@@ -703,6 +703,117 @@ a:hover {
   color: #e0e0ff;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   MEMORY BLINDFOLD GAME
+═══════════════════════════════════════════════════════════════ */
+.memory-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.memory-instruction {
+  text-align: center;
+  font-size: 1.05rem;
+  color: #a78bfa;
+  min-height: 1.6rem;
+  padding: 0.25rem 0;
+}
+.reveal-good {
+  color: #4ade80;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+.reveal-bad {
+  color: #f87171;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+/* The clickable play board */
+.memory-area {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 14 / 9;
+  background: #11112a;
+  border: 2px solid #2a2a4a;
+  border-radius: 12px;
+  overflow: hidden;
+  user-select: none;
+  touch-action: none;
+  transition: border-color 0.3s;
+}
+.memory-recall {
+  cursor: crosshair;
+  border-color: #ff4d8d;
+  box-shadow: inset 0 0 30px rgba(255, 77, 141, 0.08);
+}
+
+/* Subtle dot-grid overlay for spatial reference */
+.memory-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, #2a2a4a 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Heart icon — absolutely positioned by JS-computed xPct/yPct */
+.mheart {
+  position: absolute;
+  font-size: 1.8rem;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: opacity 0.15s;
+  filter: drop-shadow(0 0 6px rgba(255, 77, 141, 0.7));
+}
+.mheart-hidden {
+  opacity: 0;
+}
+
+/* Click markers */
+.mclick {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.mclick-pending {
+  border: 3px solid #fbbf24;
+  background: rgba(251, 191, 36, 0.15);
+  animation: ping 0.8s ease-out forwards;
+}
+.mclick-hit {
+  background: rgba(74, 222, 128, 0.35);
+  border: 3px solid #4ade80;
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.6);
+}
+.mclick-miss {
+  background: rgba(248, 113, 113, 0.25);
+  border: 3px solid #f87171;
+  box-shadow: 0 0 8px rgba(248, 113, 113, 0.5);
+}
+
+@keyframes ping {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.8);
+    opacity: 0.3;
+  }
+}
+
+.memory-reveal-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
 /* ── Back-to-home button ─────────────────────────────────── */
 .back-btn {
   display: inline-flex;

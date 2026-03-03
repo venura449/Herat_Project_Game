@@ -22,6 +22,7 @@ import { useParams, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { GAME_MODES } from "../../config/gameModes";
 import GameBoard from "../Game/GameBoard";
+import MemoryGame from "../Game/MemoryGame";
 import api from "../../services/api";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
@@ -194,8 +195,11 @@ export default function CompetitionRoom() {
         </div>
       )}
 
-      {/* ═══ PLAYING PHASE — render the GameBoard ═══ */}
-      {phase === "playing" && (
+      {/* ═══ PLAYING PHASE — render the appropriate game component ═══ */}
+      {phase === "playing" && comp.mode === "memory" && (
+        <MemoryGame onComplete={handleGameComplete} />
+      )}
+      {phase === "playing" && comp.mode !== "memory" && (
         <GameBoard
           mode={comp.mode}
           maxQuestions={comp.maxQuestions}

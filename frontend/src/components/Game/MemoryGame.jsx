@@ -61,7 +61,12 @@ function roundCfg(r) {
 }
 
 // ── Component ──────────────────────────────────────────────────────────────
-export default function MemoryGame() {
+/**
+ * @param {Function} [onComplete] - Called with (score, rounds) when the game ends.
+ *   When provided (e.g. inside CompetitionRoom), the component skips saving to
+ *   /api/scores (the competition room handles submission) and hides the back button.
+ */
+export default function MemoryGame({ onComplete }) {
   const [phase, setPhase] = useState(PHASE.IDLE);
   const [round, setRound] = useState(1);
   const [hearts, setHearts] = useState([]);
@@ -172,6 +177,13 @@ export default function MemoryGame() {
     clearInterval(timerRef.current);
     setPhase(PHASE.GAMEOVER);
     const { score, clicks: totalC } = accRef.current;
+
+    if (onComplete) {
+      // Embedded in a competition — let CompetitionRoom handle submission
+      onComplete(score, TOTAL_ROUNDS);
+      return;
+    }
+
     if (totalC > 0) {
       try {
         await api.post("/scores", {
@@ -220,9 +232,11 @@ export default function MemoryGame() {
         borderColor: accent,
       }}
     >
-      <Link to="/game" className="back-btn">
-        ← Back to Lobby
-      </Link>
+      {!onComplete && (
+        <Link to="/game" className="back-btn">
+          ← Back to Lobby
+        </Link>
+      )}
 
       {/* ── Header ── */}
       <div className="game-header">
@@ -359,7 +373,7 @@ export default function MemoryGame() {
       )}
 
       {/* ── GAMEOVER ── */}
-      {phase === PHASE.GAMEOVER && (
+      {phase === PHASE.GAMEOVER && !onComplete && (
         <div className="gameover-screen">
           <h3>Game Over! 🎉</h3>
           <p>

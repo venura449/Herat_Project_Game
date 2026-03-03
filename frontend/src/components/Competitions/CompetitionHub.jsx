@@ -15,7 +15,10 @@ export default function CompetitionHub() {
   // ── Create form state ─────────────────────────────────────────────────
   const [createName, setCreateName] = useState("");
   const [createMode, setCreateMode] = useState("classic");
+  // Memory Blindfold always runs 8 rounds; other modes use a chosen question count
+  const MEMORY_ROUNDS = 8;
   const [createMaxQ, setCreateMaxQ] = useState(10);
+  const isMemoryMode = createMode === "memory";
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
 
@@ -33,7 +36,7 @@ export default function CompetitionHub() {
       const res = await api.post("/competitions", {
         name: createName,
         mode: createMode,
-        maxQuestions: createMaxQ,
+        maxQuestions: isMemoryMode ? MEMORY_ROUNDS : createMaxQ,
       });
       navigate(`/competitions/${res.data.code}`);
     } catch (err) {
@@ -110,18 +113,26 @@ export default function CompetitionHub() {
 
             <div className="form-group">
               <label>Questions per Player</label>
-              <div className="mode-select-grid">
-                {[5, 10, 15, 20].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    className={`mode-pill ${createMaxQ === n ? "mode-pill-active" : ""}`}
-                    onClick={() => setCreateMaxQ(n)}
-                  >
-                    {n}
-                  </button>
-                ))}
-              </div>
+              {isMemoryMode ? (
+                <p className="hub-card-desc" style={{ marginBottom: 0 }}>
+                  🫀 Memory Blindfold always runs <strong>8 rounds</strong>.
+                </p>
+              ) : (
+                <div className="mode-select-grid">
+                  {[5, 10, 15, 20].map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      className={`mode-pill ${
+                        createMaxQ === n ? "mode-pill-active" : ""
+                      }`}
+                      onClick={() => setCreateMaxQ(n)}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {createError && <p className="error-msg">{createError}</p>}

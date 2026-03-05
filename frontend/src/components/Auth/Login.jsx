@@ -31,13 +31,33 @@ export default function Login() {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <h2>♥ Login</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Username</label>
+    <div className="login-page">
+      {/* Decorative floating hearts */}
+      <span className="login-deco login-deco-1">♥</span>
+      <span className="login-deco login-deco-2">♡</span>
+      <span className="login-deco login-deco-3">♥</span>
+
+      <div className="login-card">
+        {/* Dangling figure */}
+        <div className="login-dangler">
+          <div className="login-dangler-inner">
+            <div className="login-dangler-string" />
+            <div className="login-dangler-figure">🐱</div>
+          </div>
+        </div>
+
+        {/* Header */}
+        <div className="login-header">
+          <div className="login-icon">🎮</div>
+          <h1 className="login-title">Welcome Back!</h1>
+          <p className="login-subtitle">Sign in to continue playing ♥</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="login-field">
+            <label className="login-label">Username</label>
             <input
+              className="login-input"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -45,9 +65,11 @@ export default function Login() {
               required
             />
           </div>
-          <div className="form-group">
-            <label>Password</label>
+
+          <div className="login-field">
+            <label className="login-label">Password</label>
             <input
+              className="login-input"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -55,17 +77,23 @@ export default function Login() {
               required
             />
           </div>
-          {error && <p className="error-msg">{error}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary btn-full"
-          >
-            {loading ? "Logging in…" : "Login"}
+
+          {error && <p className="login-error">{error}</p>}
+
+          <button type="submit" disabled={loading} className="login-btn">
+            {loading ? (
+              <span className="login-btn-loading">Signing in…</span>
+            ) : (
+              "Login  ♥"
+            )}
           </button>
         </form>
-        <p className="auth-switch">
-          No account? <Link to="/register">Register here</Link>
+
+        <p className="login-switch">
+          New here?{" "}
+          <Link to="/register" className="login-link">
+            Create an account
+          </Link>
         </p>
       </div>
     </div>

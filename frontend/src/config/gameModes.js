@@ -15,6 +15,14 @@ export const GAME_MODES = {
         timeLimit: 0,               // 0 = no auto-submit timer
         lives: 0,                   // 0 = unlimited lives
         defaultMaxQ: 0,             // 0 = unlimited questions
+        howToPlay: [
+            'A heart puzzle image is shown on screen.',
+            'Count the number of hearts in the image.',
+            'Click the correct number from the answer buttons.',
+            'Answer faster to earn a speed bonus (up to +50 pts).',
+            'No time limit — take your time and aim for accuracy!',
+            'The game continues until you choose to stop.',
+        ],
     },
     blitz: {
         id: 'blitz',
@@ -27,6 +35,14 @@ export const GAME_MODES = {
         timeLimit: 10,              // seconds before auto-wrong
         lives: 0,
         defaultMaxQ: 10,
+        howToPlay: [
+            'A heart puzzle image is shown on screen.',
+            'You have exactly 10 seconds to answer each question.',
+            'Click the correct number before the timer runs out.',
+            'Running out of time counts as a wrong answer.',
+            'The faster you answer, the bigger the speed bonus (up to +100 pts).',
+            'Complete all 10 questions to finish the round.',
+        ],
     },
     survival: {
         id: 'survival',
@@ -39,6 +55,14 @@ export const GAME_MODES = {
         timeLimit: 0,
         lives: 3,
         defaultMaxQ: 0,
+        howToPlay: [
+            'You start with 3 lives (❤️❤️❤️).',
+            'A heart puzzle image is shown — count and click the right number.',
+            'A wrong answer costs you one life.',
+            'Lose all 3 lives and the game ends.',
+            'No time limit — stay calm and be accurate.',
+            'How many questions can you answer before you run out of lives?',
+        ],
     },
     memory: {
         id: 'memory',
@@ -52,6 +76,14 @@ export const GAME_MODES = {
         lives: 0,
         defaultMaxQ: 8,
         isMemoryGame: true,         // Rendered by MemoryGame, not GameBoard
+        howToPlay: [
+            'Hearts briefly flash on a blank board — watch carefully!',
+            'After they disappear, the board goes dark (blindfolded).',
+            'Click where you remember the hearts were.',
+            'You need to find 20% of the heart positions to pass each round.',
+            'Each of the 8 rounds shows more hearts and gives less time to memorise.',
+            'Score more by clicking correct spots quickly and accurately.',
+        ],
     },
 };
 

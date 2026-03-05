@@ -3,12 +3,13 @@
 // triggers an async handler that calls the API and updates global auth state.
 // Low Coupling: Navbar reads auth state from context and never imports route components.
 
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Event handler: logout click → API call → state update → navigation
   const handleLogout = async () => {
@@ -16,26 +17,63 @@ export default function Navbar() {
     navigate("/login");
   };
 
+  const isActive = (path) =>
+    location.pathname === path || location.pathname.startsWith(path + "/");
+
   return (
     <nav className="navbar">
+      {/* Brand */}
       <Link to="/" className="navbar-brand">
-        ♥ Heart Game
+        <span className="navbar-brand-icon">♥</span>
+        <span className="navbar-brand-text">HeartGame</span>
       </Link>
-      <div className="navbar-links">
+
+      {/* Centre nav links */}
+      {user && (
+        <div className="navbar-center">
+          <Link
+            to="/game"
+            className={`navbar-link${isActive("/game") ? " navbar-link-active" : ""}`}
+          >
+            🎮 Play
+          </Link>
+          <Link
+            to="/competitions"
+            className={`navbar-link${isActive("/competitions") ? " navbar-link-active" : ""}`}
+          >
+            ⚔️ Compete
+          </Link>
+          <Link
+            to="/leaderboard"
+            className={`navbar-link${isActive("/leaderboard") ? " navbar-link-active" : ""}`}
+          >
+            🏆 Leaderboard
+          </Link>
+        </div>
+      )}
+
+      {/* Right side */}
+      <div className="navbar-right">
         {user ? (
           <>
-            <Link to="/game">Play</Link>
-            <Link to="/competitions">⚔️ Compete</Link>
-            <Link to="/leaderboard">Leaderboard</Link>
-            <span className="navbar-user">👤 {user.username}</span>
+            <div className="navbar-user-chip">
+              <span className="navbar-user-avatar">
+                {user.username.charAt(0).toUpperCase()}
+              </span>
+              <span className="navbar-user-name">{user.username}</span>
+            </div>
             <button onClick={handleLogout} className="btn-logout">
-              Logout
+              Sign out
             </button>
           </>
         ) : (
           <>
-            <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
+            <Link to="/login" className="navbar-link">
+              Login
+            </Link>
+            <Link to="/register" className="btn-register">
+              Get Started
+            </Link>
           </>
         )}
       </div>

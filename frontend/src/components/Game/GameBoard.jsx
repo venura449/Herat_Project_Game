@@ -173,6 +173,14 @@ export default function GameBoard({
   // Keep the ref current so the blitz interval can always call the latest version
   submitAnswerRef.current = submitAnswer;
 
+  // ── Auto-advance to next question after showing result briefly ─────────
+  useEffect(() => {
+    if (status !== STATUS.ANSWERED) return;
+    const t = setTimeout(() => fetchQuestion(), 1800);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
+
   // ── End game and persist score ─────────────────────────────────────────
   const endGame = async (finalScore = score, finalQA = questionsAnswered) => {
     clearInterval(timerRef.current);
@@ -330,20 +338,12 @@ export default function GameBoard({
               ? `✓ Correct! +${result.points} pts`
               : `✗ Wrong — answer was ${result.solution}`}
           </div>
-          <div className="result-actions">
-            <button
-              onClick={fetchQuestion}
-              className="btn-primary"
-              style={{ background: config.accent }}
-            >
-              Next Question
+          <p className="result-next-hint">Next question in a moment…</p>
+          {!onComplete && (
+            <button onClick={() => endGame()} className="btn-secondary">
+              End Game &amp; Save Score
             </button>
-            {!onComplete && (
-              <button onClick={() => endGame()} className="btn-secondary">
-                End Game &amp; Save Score
-              </button>
-            )}
-          </div>
+          )}
         </div>
       )}
 

@@ -26,13 +26,25 @@ const ScoreModel = {
         return scoreDoc;
     },
 
-    /** Returns top N scores sorted by score descending, time ascending */
+    /** Returns top N scores — one entry per player (their personal best) */
     async getLeaderboard(limit = 10) {
         return getDB()
             .collection('scores')
-            .find()
-            .sort({ score: -1, createdAt: 1 })
-            .limit(limit)
+            .aggregate([
+                // Group by userId, keep the highest score and its metadata
+                {
+                    $group: {
+                        _id: '$userId',
+                        username: { $first: '$username' },
+                        score: { $max: '$score' },
+                        questionsAnswered: { $max: '$questionsAnswered' },
+                        createdAt: { $min: '$createdAt' },
+                    },
+                },
+                // Sort by best score descending, then earliest date ascending
+                { $sort: { score: -1, createdAt: 1 } },
+                { $limit: limit },
+            ])
             .toArray();
     },
 

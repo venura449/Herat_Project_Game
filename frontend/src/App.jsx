@@ -4,7 +4,13 @@
 // unauthenticated users are redirected to /login for any protected page.
 // Reference: https://reactrouter.com/ - React Router v6
 
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Navbar from "./components/Layout/Navbar";
 import Login from "./components/Auth/Login";
@@ -24,14 +30,19 @@ function ProtectedRoute({ children }) {
   return user ? children : <Navigate to="/login" replace />;
 }
 
+const AUTH_PATHS = ["/login", "/register"];
+
 function AppRoutes() {
   const { user, loading } = useAuth();
+  const location = useLocation();
+  const isAuthPage = AUTH_PATHS.includes(location.pathname);
+
   if (loading) return <div className="loading">Loading…</div>;
 
   return (
     <>
-      <Navbar />
-      <main className="main-content">
+      {!isAuthPage && <Navbar />}
+      {isAuthPage ? (
         <Routes>
           {/* Root redirects based on auth state */}
           <Route
@@ -48,59 +59,69 @@ function AppRoutes() {
             path="/register"
             element={user ? <Navigate to="/game" replace /> : <Register />}
           />
-
-          {/* Protected game routes */}
-          <Route
-            path="/game"
-            element={
-              <ProtectedRoute>
-                <GameLobby />
-              </ProtectedRoute>
-            }
-          />
-          {/* Memory Blindfold — static segment matches before :mode wildcard */}
-          <Route
-            path="/game/memory"
-            element={
-              <ProtectedRoute>
-                <MemoryGame />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/game/:mode"
-            element={
-              <ProtectedRoute>
-                <GameBoard />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Competition routes */}
-          <Route
-            path="/competitions"
-            element={
-              <ProtectedRoute>
-                <CompetitionHub />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/competitions/:code"
-            element={
-              <ProtectedRoute>
-                <CompetitionRoom />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Public leaderboard */}
-          <Route path="/leaderboard" element={<Leaderboard />} />
-
-          {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </main>
+      ) : (
+        <main className="main-content">
+          <Routes>
+            <Route
+              path="/"
+              element={<Navigate to={user ? "/game" : "/login"} replace />}
+            />
+
+            {/* Protected game routes */}
+            <Route
+              path="/game"
+              element={
+                <ProtectedRoute>
+                  <GameLobby />
+                </ProtectedRoute>
+              }
+            />
+            {/* Memory Blindfold — static segment matches before :mode wildcard */}
+            <Route
+              path="/game/memory"
+              element={
+                <ProtectedRoute>
+                  <MemoryGame />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/game/:mode"
+              element={
+                <ProtectedRoute>
+                  <GameBoard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Competition routes */}
+            <Route
+              path="/competitions"
+              element={
+                <ProtectedRoute>
+                  <CompetitionHub />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/competitions/:code"
+              element={
+                <ProtectedRoute>
+                  <CompetitionRoom />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Public leaderboard */}
+            <Route path="/leaderboard" element={<Leaderboard />} />
+
+            {/* Catch-all */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+      )}
     </>
   );
 }

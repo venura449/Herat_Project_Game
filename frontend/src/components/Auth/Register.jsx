@@ -38,13 +38,34 @@ export default function Register() {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <h2>♥ Create Account</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Username</label>
+    <div className="login-page">
+      {/* Decorative floating hearts */}
+      <span className="login-deco login-deco-1">♥</span>
+      <span className="login-deco login-deco-2">♡</span>
+      <span className="login-deco login-deco-3">♥</span>
+      <span className="login-deco login-deco-4">♡</span>
+
+      <div className="login-card">
+        {/* Dangling figure */}
+        <div className="login-dangler">
+          <div className="login-dangler-inner">
+            <div className="login-dangler-string" />
+            <div className="login-dangler-figure">🐰</div>
+          </div>
+        </div>
+
+        {/* Header */}
+        <div className="login-header">
+          <div className="login-icon">✨</div>
+          <h1 className="login-title">Create Account</h1>
+          <p className="login-subtitle">Join the game and play ♥</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="login-field">
+            <label className="login-label">Username</label>
             <input
+              className="login-input"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -52,9 +73,11 @@ export default function Register() {
               required
             />
           </div>
-          <div className="form-group">
-            <label>Password</label>
+
+          <div className="login-field">
+            <label className="login-label">Password</label>
             <input
+              className="login-input"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -62,9 +85,11 @@ export default function Register() {
               required
             />
           </div>
-          <div className="form-group">
-            <label>Confirm Password</label>
+
+          <div className="login-field">
+            <label className="login-label">Confirm Password</label>
             <input
+              className="login-input"
               type="password"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
@@ -72,17 +97,23 @@ export default function Register() {
               required
             />
           </div>
-          {error && <p className="error-msg">{error}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary btn-full"
-          >
-            {loading ? "Creating account…" : "Register"}
+
+          {error && <p className="login-error">{error}</p>}
+
+          <button type="submit" disabled={loading} className="login-btn">
+            {loading ? (
+              <span className="login-btn-loading">Creating account…</span>
+            ) : (
+              "Register  ♥"
+            )}
           </button>
         </form>
-        <p className="auth-switch">
-          Already have an account? <Link to="/login">Login</Link>
+
+        <p className="login-switch">
+          Already have an account?{" "}
+          <Link to="/login" className="login-link">
+            Sign in
+          </Link>
         </p>
       </div>
     </div>

@@ -26,26 +26,28 @@ const ScoreModel = {
         return scoreDoc;
     },
 
-    /** Returns top N scores — one entry per player (their personal best) */
-    async getLeaderboard(limit = 10) {
-        return getDB()
-            .collection('scores')
-            .aggregate([
-                // Group by userId, keep the highest score and its metadata
-                {
-                    $group: {
-                        _id: '$userId',
-                        username: { $first: '$username' },
-                        score: { $max: '$score' },
-                        questionsAnswered: { $max: '$questionsAnswered' },
-                        createdAt: { $min: '$createdAt' },
-                    },
+    /** Returns top N scores — one entry per player (their personal best)
+     *  If `mode` is provided, only scores for that game mode are included.
+     */
+    async getLeaderboard(limit = 10, mode = null) {
+        const pipeline = [];
+        if (mode) pipeline.push({ $match: { gameMode: mode } });
+        pipeline.push(
+            // Group by userId, keep the highest score and its metadata
+            {
+                $group: {
+                    _id: '$userId',
+                    username: { $first: '$username' },
+                    score: { $max: '$score' },
+                    questionsAnswered: { $max: '$questionsAnswered' },
+                    createdAt: { $min: '$createdAt' },
                 },
-                // Sort by best score descending, then earliest date ascending
-                { $sort: { score: -1, createdAt: 1 } },
-                { $limit: limit },
-            ])
-            .toArray();
+            },
+            // Sort by best score descending, then earliest date ascending
+            { $sort: { score: -1, createdAt: 1 } },
+            { $limit: limit },
+        );
+        return getDB().collection('scores').aggregate(pipeline).toArray();
     },
 
     /** Returns the most recent scores for a specific user */

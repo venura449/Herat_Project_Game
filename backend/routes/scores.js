@@ -34,9 +34,12 @@ router.post('/', authMiddleware, async (req, res) => {
 });
 
 // GET /api/scores/leaderboard - Public leaderboard (no auth required)
+// Optional query param: ?mode=classic|blitz|survival|memory (omit for all-modes)
 router.get('/leaderboard', async (req, res) => {
     try {
-        const leaderboard = await Score.getLeaderboard(10);
+        const VALID_MODES = ['classic', 'blitz', 'survival', 'memory'];
+        const mode = VALID_MODES.includes(req.query.mode) ? req.query.mode : null;
+        const leaderboard = await Score.getLeaderboard(10, mode);
         res.json(leaderboard);
     } catch (err) {
         res.status(500).json({ error: 'Failed to fetch leaderboard' });

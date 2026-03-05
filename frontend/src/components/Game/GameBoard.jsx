@@ -25,6 +25,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../../services/api";
 import { GAME_MODES, calcPoints } from "../../config/gameModes";
+import { playDing, playBuzzer, playTick } from "../../utils/sounds";
 
 const STATUS = {
   IDLE: "idle",
@@ -61,11 +62,14 @@ export default function GameBoard({
   const [lives, setLives] = useState(config.lives || Infinity);
   const [error, setError] = useState("");
   const [scoreSaved, setScoreSaved] = useState(false);
+  const [popups, setPopups] = useState([]); // floating +pts animations
+  const [difficulty, setDifficulty] = useState(1); // classic mode level (1–5)
 
   const timerRef = useRef(null);
   const submittingRef = useRef(false); // prevents double-submission (e.g. button + blitz timeout)
   // Keep a stable ref to submitAnswer so the blitz interval can call it without stale closure
   const submitAnswerRef = useRef(null);
+  const correctStreakRef = useRef(0); // tracks correct answers for difficulty progression
 
   // Reset lives when mode changes (e.g. navigating between modes)
   useEffect(() => {
@@ -92,6 +96,7 @@ export default function GameBoard({
     setCountdown(config.timeLimit);
 
     const interval = setInterval(() => {
+      playTick();
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
@@ -127,7 +132,10 @@ export default function GameBoard({
   };
 
   // ── Submit answer ──────────────────────────────────────────────────────
-  const submitAnswer = async (answer) => {
+  // Difficulty multipliers for Classic mode: Level 1 → 1×, up to Level 5 → 2×
+  const DIFF_MULTIPLIERS = [0, 1.0, 1.2, 1.5, 1.8, 2.0];
+
+  const submitAnswer = async (answer, e) => {
     if (status !== STATUS.PLAYING || submittingRef.current) return;
     submittingRef.current = true;
     setStatus(STATUS.LOADING);
@@ -138,7 +146,36 @@ export default function GameBoard({
         answer,
       });
       const { correct, solution } = res.data;
-      const points = calcPoints(modeKey, correct, elapsed);
+      const basePoints = calcPoints(modeKey, correct, elapsed);
+      // Apply difficulty multiplier in Classic mode
+      const multiplier =
+        modeKey === "classic" ? (DIFF_MULTIPLIERS[difficulty] ?? 1) : 1;
+      const points = Math.round(basePoints * multiplier);
+
+      // ── Sound effects ────────────────────────────────────────────────
+      if (correct) playDing();
+      else playBuzzer();
+
+      // ── Difficulty progression (Classic only) ────────────────────────
+      if (modeKey === "classic" && correct) {
+        correctStreakRef.current += 1;
+        if (correctStreakRef.current % 3 === 0 && difficulty < 5) {
+          setDifficulty((d) => Math.min(5, d + 1));
+        }
+      }
+
+      // ── Score pop-up ─────────────────────────────────────────────────
+      if (correct && points > 0 && e) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top;
+        const pid = Date.now() + Math.random();
+        setPopups((prev) => [...prev, { id: pid, pts: points, x, y }]);
+        setTimeout(
+          () => setPopups((prev) => prev.filter((p) => p.id !== pid)),
+          1200,
+        );
+      }
 
       const newScore = score + points;
       const newQA = questionsAnswered + 1;
@@ -214,6 +251,9 @@ export default function GameBoard({
     setLives(config.lives || Infinity);
     setError("");
     setScoreSaved(false);
+    setPopups([]);
+    setDifficulty(1);
+    correctStreakRef.current = 0;
     submittingRef.current = false;
   };
 
@@ -249,6 +289,14 @@ export default function GameBoard({
       <div className="game-header">
         <h2 style={{ color: config.accent }}>
           {config.emoji} {config.label}
+          {modeKey === "classic" &&
+            status !== STATUS.IDLE &&
+            status !== STATUS.GAMEOVER && (
+              <span className="difficulty-badge" data-level={difficulty}>
+                Lv.{difficulty}
+                {difficulty >= 4 ? " 🔥" : difficulty >= 2 ? " ✦" : ""}
+              </span>
+            )}
         </h2>
         <div className="game-stats">
           <span>
@@ -312,7 +360,7 @@ export default function GameBoard({
             {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
               <button
                 key={num}
-                onClick={() => submitAnswer(num)}
+                onClick={(e) => submitAnswer(num, e)}
                 className="btn-answer"
                 style={{ "--btn-hover": config.accent }}
               >
@@ -378,6 +426,16 @@ export default function GameBoard({
           )}
         </div>
       )}
+      {/* Floating +pts score popups */}
+      {popups.map(({ id, pts, x, y }) => (
+        <div
+          key={id}
+          className="score-popup"
+          style={{ left: `${x}px`, top: `${y}px` }}
+        >
+          +{pts}
+        </div>
+      ))}
     </div>
   );
 }

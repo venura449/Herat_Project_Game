@@ -60,6 +60,13 @@ app.use((req, res) => {
     res.status(404).json({ error: 'Route not found' });
 });
 
+// Global error handler: ensures ALL errors return JSON (not Express' default HTML)
+app.use((err, req, res, next) => {
+    console.error('Unhandled error:', err.message || err);
+    const status = err.status || 500;
+    res.status(status).json({ error: err.message || 'Internal server error' });
+});
+
 // ── Server Startup ─────────────────────────────────────────────────────────
 app.listen(PORT, async () => {
     try {

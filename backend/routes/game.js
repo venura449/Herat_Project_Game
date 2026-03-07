@@ -76,31 +76,35 @@ router.get('/question', authMiddleware, async (req, res) => {
 });
 
 // POST /api/game/answer - Submit an answer and receive judgment
-router.post('/answer', authMiddleware, (req, res) => {
-    const { questionId, answer } = req.body;
+router.post('/answer', authMiddleware, (req, res, next) => {
+    try {
+        const { questionId, answer } = req.body;
 
-    if (answer === undefined || answer === null) {
-        return res.status(400).json({ error: 'Answer is required' });
+        if (answer === undefined || answer === null) {
+            return res.status(400).json({ error: 'Answer is required' });
+        }
+
+        const questionData = activeQuestions.get(questionId);
+        if (!questionData) {
+            return res.status(400).json({ error: 'Question not found or expired. Please request a new question.' });
+        }
+
+        // Clean up immediately after answering (one attempt per question)
+        activeQuestions.delete(questionId);
+
+        const correct = parseInt(answer, 10) === questionData.solution;
+        const timeTaken = Math.floor((Date.now() - questionData.fetchedAt) / 1000);
+
+        // Scoring: 100 base points + speed bonus (up to +50 for answers under 25 seconds)
+        const speedBonus = correct ? Math.max(0, 50 - timeTaken * 2) : 0;
+        const points = correct ? 100 + speedBonus : 0;
+
+        gameEvents.emit('answerSubmitted', { username: req.user.username, correct, timeTaken });
+
+        res.json({ correct, solution: questionData.solution, timeTaken, points });
+    } catch (err) {
+        next(err);
     }
-
-    const questionData = activeQuestions.get(questionId);
-    if (!questionData) {
-        return res.status(400).json({ error: 'Question not found or expired. Please request a new question.' });
-    }
-
-    // Clean up immediately after answering (one attempt per question)
-    activeQuestions.delete(questionId);
-
-    const correct = parseInt(answer, 10) === questionData.solution;
-    const timeTaken = Math.floor((Date.now() - questionData.fetchedAt) / 1000);
-
-    // Scoring: 100 base points + speed bonus (up to +50 for answers under 25 seconds)
-    const speedBonus = correct ? Math.max(0, 50 - timeTaken * 2) : 0;
-    const points = correct ? 100 + speedBonus : 0;
-
-    gameEvents.emit('answerSubmitted', { username: req.user.username, correct, timeTaken });
-
-    res.json({ correct, solution: questionData.solution, timeTaken, points });
 });
 
 module.exports = router;

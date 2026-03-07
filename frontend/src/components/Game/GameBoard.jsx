@@ -201,7 +201,9 @@ export default function GameBoard({
         setStatus(STATUS.ANSWERED);
       }
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to submit answer.");
+      const msg = err.response?.data?.error
+        || (err.response ? `Server error (${err.response.status})` : "Network error — check your connection.");
+      setError(msg);
       setStatus(STATUS.ANSWERED);
       submittingRef.current = false;
     }

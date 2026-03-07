@@ -112,8 +112,8 @@ export default function GameBoard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, question]);
 
-  // ── Fetch a new question ───────────────────────────────────────────────
-  const fetchQuestion = async () => {
+  // ── Fetch a new question (with one automatic retry) ────────────────────
+  const fetchQuestion = async (retry = true) => {
     setStatus(STATUS.LOADING);
     setResult(null);
     setError("");
@@ -124,6 +124,11 @@ export default function GameBoard({
       setQuestion(res.data);
       setStatus(STATUS.PLAYING);
     } catch (err) {
+      if (retry) {
+        // Auto-retry once after a short delay (handles transient network blips)
+        setTimeout(() => fetchQuestion(false), 1500);
+        return;
+      }
       setError(
         err.response?.data?.error || "Failed to load question. Please retry.",
       );
@@ -138,6 +143,15 @@ export default function GameBoard({
   const submitAnswer = async (answer, e) => {
     if (status !== STATUS.PLAYING || submittingRef.current) return;
     submittingRef.current = true;
+
+    // Capture button position synchronously BEFORE the await (e.currentTarget
+    // becomes null after the event finishes propagating)
+    let btnRect = null;
+    if (e?.currentTarget) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      btnRect = { x: rect.left + rect.width / 2, y: rect.top };
+    }
+
     setStatus(STATUS.LOADING);
 
     try {
@@ -165,12 +179,12 @@ export default function GameBoard({
       }
 
       // ── Score pop-up ─────────────────────────────────────────────────
-      if (correct && points > 0 && e) {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const x = rect.left + rect.width / 2;
-        const y = rect.top;
+      if (correct && points > 0 && btnRect) {
         const pid = Date.now() + Math.random();
-        setPopups((prev) => [...prev, { id: pid, pts: points, x, y }]);
+        setPopups((prev) => [
+          ...prev,
+          { id: pid, pts: points, x: btnRect.x, y: btnRect.y },
+        ]);
         setTimeout(
           () => setPopups((prev) => prev.filter((p) => p.id !== pid)),
           1200,
@@ -201,8 +215,18 @@ export default function GameBoard({
         setStatus(STATUS.ANSWERED);
       }
     } catch (err) {
+      const serverMsg = err.response?.data?.error || "";
+      // If the question expired (e.g. server restart), silently fetch a new one
+      if (
+        err.response?.status === 400 &&
+        serverMsg.includes("not found or expired")
+      ) {
+        submittingRef.current = false;
+        fetchQuestion();
+        return;
+      }
       const msg =
-        err.response?.data?.error ||
+        serverMsg ||
         (err.response
           ? `Server error (${err.response.status})`
           : "Network error — check your connection.");

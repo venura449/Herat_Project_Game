@@ -42,11 +42,17 @@ export default function GameLobby() {
       <div className="mode-grid">
         {Object.values(GAME_MODES).map((mode) => (
           // Event-Driven: onClick event navigates to the selected game mode route
-          <button
+          <div
             key={mode.id}
             className="mode-card"
+            role="button"
+            tabIndex={0}
             style={{ "--mode-accent": mode.accent, "--mode-glow": mode.glow }}
             onClick={() => navigate(`/game/${mode.id}`)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ")
+                navigate(`/game/${mode.id}`);
+            }}
           >
             {/* How-to-play info button */}
             <button
@@ -69,7 +75,7 @@ export default function GameLobby() {
             {mode.timeLimit > 0 && (
               <p className="mode-tag">⏱ {mode.timeLimit}s per question</p>
             )}
-          </button>
+          </div>
         ))}
       </div>
 

@@ -34,7 +34,7 @@ setInterval(() => {
  */
 function fetchHeartQuestion() {
     return new Promise((resolve, reject) => {
-        https.get('https://marcconrad.com/uob/heart/api.php?out=json', (res) => {
+        const req = https.get('https://marcconrad.com/uob/heart/api.php?out=json', (res) => {
             let data = '';
             res.on('data', (chunk) => { data += chunk; }); // Event: data chunk received
             res.on('end', () => {                           // Event: response complete
@@ -44,7 +44,9 @@ function fetchHeartQuestion() {
                     reject(new Error('Invalid JSON from Heart API'));
                 }
             });
-        }).on('error', reject); // Event: network error
+        });
+        req.on('error', reject); // Event: network error
+        req.setTimeout(10000, () => { req.destroy(); reject(new Error('Heart API timed out')); });
     });
 }
 

@@ -13,6 +13,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import api from "../../services/api";
+import { startBgMusic, stopBgMusic } from "../../utils/sounds";
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const PHASE = {
@@ -88,6 +89,20 @@ export default function MemoryGame({ onComplete }) {
 
   // Cleanup interval on unmount
   useEffect(() => () => clearInterval(timerRef.current), []);
+
+  // ── Background music: play while game is active, stop on end/unmount ───
+  useEffect(() => {
+    if (
+      phase === PHASE.SHOWING ||
+      phase === PHASE.RECALL ||
+      phase === PHASE.REVEAL
+    ) {
+      startBgMusic();
+    } else {
+      stopBgMusic();
+    }
+    return () => stopBgMusic();
+  }, [phase]);
 
   // ── Start / restart a round ──────────────────────────────────────────────
   const startRound = (r) => {

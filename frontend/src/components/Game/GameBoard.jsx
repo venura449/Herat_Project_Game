@@ -25,7 +25,13 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../../services/api";
 import { GAME_MODES, calcPoints } from "../../config/gameModes";
-import { playDing, playBuzzer, playTick } from "../../utils/sounds";
+import {
+  playDing,
+  playBuzzer,
+  playTick,
+  startBgMusic,
+  stopBgMusic,
+} from "../../utils/sounds";
 
 const STATUS = {
   IDLE: "idle",
@@ -75,6 +81,20 @@ export default function GameBoard({
   useEffect(() => {
     setLives(config.lives || Infinity);
   }, [config.lives]);
+
+  // ── Background music: play while game is active, stop on end/unmount ───
+  useEffect(() => {
+    if (
+      status === STATUS.PLAYING ||
+      status === STATUS.ANSWERED ||
+      status === STATUS.LOADING
+    ) {
+      startBgMusic();
+    } else {
+      stopBgMusic();
+    }
+    return () => stopBgMusic();
+  }, [status]);
 
   // ── Elapsed timer: counts UP while playing ─────────────────────────────
   useEffect(() => {

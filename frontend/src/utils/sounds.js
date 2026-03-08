@@ -66,3 +66,28 @@ export function playTick() {
     osc.stop(ctx.currentTime + 0.07);
   } catch { /* silenced */ }
 }
+
+// ── Background music ───────────────────────────────────────────────────────
+let bgAudio = null;
+
+/** Start looping background music. Safe to call multiple times. */
+export function startBgMusic() {
+  try {
+    if (!bgAudio) {
+      bgAudio = new Audio('/bg-music.mpeg');
+      bgAudio.loop = true;
+      bgAudio.volume = 0.3;
+    }
+    if (bgAudio.paused) bgAudio.play().catch(() => { });
+  } catch { /* silenced */ }
+}
+
+/** Pause background music and reset to start. */
+export function stopBgMusic() {
+  try {
+    if (bgAudio && !bgAudio.paused) {
+      bgAudio.pause();
+      bgAudio.currentTime = 0;
+    }
+  } catch { /* silenced */ }
+}
